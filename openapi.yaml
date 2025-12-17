@@ -112,6 +112,20 @@ components:
       required:
         - dateTime
         - timeZone
+
+    ItemBody:
+      type: object
+      additionalProperties: false
+      properties:
+        contentType:
+          type: string
+          enum: [text, html]
+          default: text
+        content:
+          type: string
+          description: Task notes / remarks
+      required: [contentType, content]
+
     TaskStatus:
       type: string
       enum:
@@ -126,6 +140,7 @@ components:
         - low
         - normal
         - high
+
     TodoList:
       type: object
       additionalProperties: true
@@ -134,6 +149,7 @@ components:
           type: string
         displayName:
           type: string
+
     TodoListCollectionResponse:
       type: object
       additionalProperties: true
@@ -142,6 +158,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TodoList"
+
     TodoTask:
       type: object
       additionalProperties: true
@@ -160,6 +177,9 @@ components:
           $ref: "#/components/schemas/DateTimeTimeZone"
         dueDateTime:
           $ref: "#/components/schemas/DateTimeTimeZone"
+        body:
+          $ref: "#/components/schemas/ItemBody"
+
     TodoTaskCollectionResponse:
       type: object
       additionalProperties: true
@@ -168,6 +188,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/TodoTask"
+
     TodoTaskCreate:
       type: object
       additionalProperties: false
@@ -183,8 +204,11 @@ components:
           description: Set true to enable reminder notifications in Microsoft To Do.
         reminderDateTime:
           $ref: "#/components/schemas/DateTimeTimeZone"
+        body:
+          $ref: "#/components/schemas/ItemBody"
       required:
         - title
+
     TodoTaskUpdate:
       type: object
       additionalProperties: false
@@ -201,6 +225,9 @@ components:
           type: boolean
         reminderDateTime:
           $ref: "#/components/schemas/DateTimeTimeZone"
+        body:
+          $ref: "#/components/schemas/ItemBody"
+
 security:
   - oauth2:
       - openid
