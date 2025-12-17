@@ -1,0 +1,209 @@
+openapi: 3.1.0
+info:
+  title: Microsoft To Do via Graph
+  version: 1.0.2
+servers:
+  - url: https://graph.microsoft.com/v1.0
+paths:
+  /me/todo/lists:
+    get:
+      operationId: listLists
+      summary: List all To Do lists
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoListCollectionResponse"
+  /me/todo/lists/{listId}/tasks:
+    get:
+      operationId: listTasks
+      summary: List tasks under a specific list
+      parameters:
+        - in: path
+          name: listId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoTaskCollectionResponse"
+    post:
+      operationId: createTask
+      summary: Create a new task
+      parameters:
+        - in: path
+          name: listId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoTaskCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoTask"
+  /me/todo/lists/{listId}/tasks/{taskId}:
+    patch:
+      operationId: updateTask
+      summary: Update a task
+      parameters:
+        - in: path
+          name: listId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoTaskUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodoTask"
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/v2.0/token
+          scopes:
+            openid: OpenID
+            offline_access: Refresh tokens
+            User.Read: Read user profile
+            Tasks.ReadWrite: Read and write To Do tasks
+  schemas:
+    DateTimeTimeZone:
+      type: object
+      additionalProperties: false
+      properties:
+        dateTime:
+          type: string
+          description: Local date-time string (no timezone offset), e.g. 2025-12-16T22:00:00
+        timeZone:
+          type: string
+          description: |
+            Time zone name. For Microsoft Graph DateTimeTimeZone this is typically a Windows time zone ID,
+            e.g. "China Standard Time".
+      required:
+        - dateTime
+        - timeZone
+    TaskStatus:
+      type: string
+      enum:
+        - notStarted
+        - inProgress
+        - completed
+        - waitingOnOthers
+        - deferred
+    Importance:
+      type: string
+      enum:
+        - low
+        - normal
+        - high
+    TodoList:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+    TodoListCollectionResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        value:
+          type: array
+          items:
+            $ref: "#/components/schemas/TodoList"
+    TodoTask:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        importance:
+          $ref: "#/components/schemas/Importance"
+        isReminderOn:
+          type: boolean
+        reminderDateTime:
+          $ref: "#/components/schemas/DateTimeTimeZone"
+        dueDateTime:
+          $ref: "#/components/schemas/DateTimeTimeZone"
+    TodoTaskCollectionResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        value:
+          type: array
+          items:
+            $ref: "#/components/schemas/TodoTask"
+    TodoTaskCreate:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+        importance:
+          $ref: "#/components/schemas/Importance"
+        dueDateTime:
+          $ref: "#/components/schemas/DateTimeTimeZone"
+        isReminderOn:
+          type: boolean
+          description: Set true to enable reminder notifications in Microsoft To Do.
+        reminderDateTime:
+          $ref: "#/components/schemas/DateTimeTimeZone"
+      required:
+        - title
+    TodoTaskUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        importance:
+          $ref: "#/components/schemas/Importance"
+        dueDateTime:
+          $ref: "#/components/schemas/DateTimeTimeZone"
+        isReminderOn:
+          type: boolean
+        reminderDateTime:
+          $ref: "#/components/schemas/DateTimeTimeZone"
+security:
+  - oauth2:
+      - openid
+      - offline_access
+      - User.Read
+      - Tasks.ReadWrite
