@@ -26,6 +26,47 @@ paths:
           required: true
           schema:
             type: string
+
+        # OData: 过滤（可用于未完成、按日期范围等）
+        - in: query
+          name: $filter
+          required: false
+          schema:
+            type: string
+          description: >
+            OData filter. Examples:
+            status ne 'completed'
+            dueDateTime/dateTime ge '2025-12-16T00:00:00' and dueDateTime/dateTime lt '2025-12-17T00:00:00'
+
+        # OData: 排序
+        - in: query
+          name: $orderby
+          required: false
+          schema:
+            type: string
+          description: >
+            OData orderby. Example: dueDateTime/dateTime asc
+
+        # OData: 限制返回数量，防止任务太多占用上下文
+        - in: query
+          name: $top
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Max items to return (recommend 20)
+
+        # OData: 选择字段，进一步节省上下文
+        - in: query
+          name: $select
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated fields to return. Example:
+            id,title,status,importance,dueDateTime,isReminderOn,reminderDateTime,body
       responses:
         "200":
           description: OK
