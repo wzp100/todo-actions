@@ -21,6 +21,8 @@ OpenAPI 版本：`1.0.2`（见 `openapi.yaml`）
 - 创建任务：`POST /me/todo/lists/{listId}/tasks`（`operationId: createTask`）
 - 更新任务（如改标题/状态/到期/提醒/备注）：`PATCH /me/todo/lists/{listId}/tasks/{taskId}`（`operationId: updateTask`）
 
+`listTasks` 额外支持常用 OData 查询参数（可选）：`$filter` / `$orderby` / `$top` / `$select`（见 `openapi.yaml`）。
+
 | operationId | Method | Path | 说明 |
 | --- | --- | --- | --- |
 | `listLists` | GET | `/me/todo/lists` | 获取当前用户的 To Do 清单 |
@@ -30,8 +32,12 @@ OpenAPI 版本：`1.0.2`（见 `openapi.yaml`）
 
 ## 文件说明
 - `openapi.yaml`：OpenAPI 3.1 定义（server：`https://graph.microsoft.com/v1.0`）
+- `prompt.md`：推荐的 Actions 提示词（偏“待办/提醒助手”行为）
 - `PRIVACY_POLICY.md`：隐私政策（面向 Actions/集成场景）
 - `LICENSE`：MIT License
+
+## 推荐提示词（Actions Instructions）
+如果你在 ChatGPT Actions 里导入了本项目的 OpenAPI，建议把 `prompt.md` 的内容粘贴到该 Action 的 `Instructions`，让模型在创建/更新任务时更稳定（例如：先选清单、尽量避免重复、只在必要时设置提醒）。
 
 ## 快速开始：用于 ChatGPT Actions
 下面以“在 ChatGPT Actions 中导入并使用”为例（其他平台流程类似：导入 OpenAPI → 配置 OAuth → 测试接口）。
@@ -97,6 +103,13 @@ curl -sS -X PATCH "https://graph.microsoft.com/v1.0/me/todo/lists/$LIST_ID/tasks
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{ "status": "completed" }'
+```
+
+### 列出未完成任务（带筛选/排序/字段裁剪）
+```bash
+curl -sS "https://graph.microsoft.com/v1.0/me/todo/lists/$LIST_ID/tasks?\
+%24filter=status%20ne%20'completed'&%24orderby=dueDateTime%2FdateTime%20asc&%24top=20&%24select=id,title,status,dueDateTime" \
+  -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
 ## 数据模型要点
